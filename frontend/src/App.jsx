@@ -12,6 +12,7 @@ export default function App(){
         <a className="findlink" href="https://www.google.com/android/find" target="_blank" rel="noreferrer">Google Find My Device</a>
       </header>
       <Routes>
+        <Route path="/register" element={<Register />} />
         <Route path="/" element={<Login/>}/>
         <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path="/nfc/:token" element={<NFCView/>}/>
