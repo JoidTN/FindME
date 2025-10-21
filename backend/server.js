@@ -303,6 +303,9 @@ app.put('/api/profiles/:id/location', authMiddleware, async (req, res) => {
     res.status(500).send({ error: 'server error' });
   }
 });
+ensureTables();
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`✅ Servidor escuchando en puerto ${PORT}`));
 
 // -------------------------
 // 🚀 INICIO DEL SERVIDOR
