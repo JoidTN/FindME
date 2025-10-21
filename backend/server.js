@@ -151,3 +151,26 @@ app.put('/api/profiles/:id/location', authMiddleware, async (req,res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, ()=> console.log('Server listening on', PORT));
+
+import express from "express";
+import cors from "cors";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Ejemplo de ruta raíz
+app.get("/", (req, res) => {
+  res.send("Servidor corriendo correctamente ✅");
+});
+
+// Tus rutas reales
+import authRoutes from "./routes/auth.js";
+app.use("/api", authRoutes);
+
+// IMPORTANTE: Render asigna el puerto automáticamente
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});
