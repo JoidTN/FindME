@@ -59,7 +59,6 @@ const createTablesSQL = `
     revoked BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT now()
   );
-
   `;
 
   try {
@@ -193,27 +192,52 @@ app.get('/api/users/:userId/profiles', authMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/profiles/:id/nfc', authMiddleware, async (req, res) => {
+app.post('/api/users/:userId/profiles', authMiddleware, async (req, res) => {
   try {
-    const profileId = req.params.id;
-    const check = await pool.query('SELECT owner_id FROM profiles WHERE id=$1', [
-      profileId,
-    ]);
-    if (!check.rows[0])
-      return res.status(404).send({ error: 'profile not found' });
-    if (check.rows[0].owner_id !== req.user.id)
+    const { userId } = req.params;
+    if (req.user.id !== userId)
       return res.status(403).send({ error: 'forbidden' });
 
-    const token = uuidv4() + '-' + Math.random().toString(36).slice(2, 10);
-    const expireAt = new Date(Date.now() + 7 * 24 * 3600 * 1000); // 7 días
-    const q = `INSERT INTO nfc_tokens(profile_id, token, max_uses, expire_at) VALUES($1,$2,$3,$4) RETURNING token,expire_at`;
+    const {
+      full_name,
+      username,
+      password,
+      birth_date,
+      allergies,
+      hospital,
+      contact_number,
+      emergency_email,
+      emergency_contact,
+      medical_notes,
+      blood_type
+    } = req.body;
+
+    const password_hash = password ? await bcrypt.hash(password, 10) : null;
+
+    const q = `
+      INSERT INTO profiles (
+        owner_id, full_name, username, password_hash, birth_date,
+        allergies, hospital, contact_number, emergency_email,
+        emergency_contact, medical_notes, blood_type
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      RETURNING *`;
+
     const r = await pool.query(q, [
-      profileId,
-      token,
-      1,
-      expireAt.toISOString(),
+      userId,
+      full_name,
+      username,
+      password_hash,
+      birth_date,
+      allergies,
+      hospital,
+      contact_number,
+      emergency_email,
+      emergency_contact,
+      medical_notes,
+      blood_type
     ]);
-    res.json({ token: r.rows[0].token, expire_at: r.rows[0].expire_at });
+
+    res.json(r.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).send({ error: 'server error' });
