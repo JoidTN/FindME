@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); // 👈 solo esta línea, no uses "import dotenv" también
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -10,10 +10,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// 🔌 Conexión a PostgreSQL (Render)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me';
 
-// ✅ Ruta de prueba para verificar que Render responda
+// ✅ Ruta de prueba
 app.get('/', (req, res) => {
   res.send('Servidor corriendo correctamente ✅');
 });
@@ -137,7 +142,8 @@ app.post('/api/profiles/:id/nfc', authMiddleware, async (req, res) => {
     const check = await pool.query('SELECT owner_id FROM profiles WHERE id=$1', [
       profileId,
     ]);
-    if (!check.rows[0]) return res.status(404).send({ error: 'profile not found' });
+    if (!check.rows[0])
+      return res.status(404).send({ error: 'profile not found' });
     if (check.rows[0].owner_id !== req.user.id)
       return res.status(403).send({ error: 'forbidden' });
 
