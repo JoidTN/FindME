@@ -6,7 +6,7 @@ export default function Register() {
     email: '',
     password: '',
   });
-  const [loading, setLoading] = useState(false);
+
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
@@ -15,38 +15,35 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage('');
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
 
       const data = await res.json();
+
       if (res.ok) {
-        setMessage('✅ Registro exitoso. Ahora puedes iniciar sesión.');
+        setMessage('✅ Usuario registrado con éxito');
       } else {
-        setMessage(`⚠️ Error: ${data.error || 'No se pudo registrar'}`);
+        setMessage(`❌ Error: ${data.error || 'No se pudo registrar'}`);
       }
-    } catch (err) {
-      console.error(err);
-      setMessage('❌ Error de conexión con el servidor.');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setMessage('❌ Error de conexión con el servidor');
     }
   };
 
   return (
-    <div className="login-container">
+    <div className="container">
       <h2>Crear cuenta</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           name="name"
-          placeholder="Nombre"
+          placeholder="Nombre completo"
           value={form.name}
           onChange={handleChange}
           required
@@ -54,7 +51,7 @@ export default function Register() {
         <input
           type="email"
           name="email"
-          placeholder="Correo"
+          placeholder="Correo electrónico"
           value={form.email}
           onChange={handleChange}
           required
@@ -67,11 +64,10 @@ export default function Register() {
           onChange={handleChange}
           required
         />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registrando...' : 'Registrarse'}
-        </button>
+        <button type="submit">Registrarse</button>
       </form>
-      {message && <p className="message">{message}</p>}
+      {message && <p>{message}</p>}
     </div>
   );
 }
+
