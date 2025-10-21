@@ -18,43 +18,48 @@ const pool = new Pool({
 
 // 🔽 Crear tablas automáticamente si no existen
 async function ensureTables() {
-  const createTablesSQL = `
-    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+const createTablesSQL = `
+  CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-    CREATE TABLE IF NOT EXISTS users (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      name TEXT,
-      created_at TIMESTAMP DEFAULT now()
-    );
+  CREATE TABLE IF NOT EXISTS users (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    name TEXT,
+    created_at TIMESTAMP DEFAULT now()
+  );
 
-    CREATE TABLE IF NOT EXISTS profiles (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      full_name TEXT,
-      allergies TEXT,
-      contact_number TEXT,
-      email TEXT,
-      blood_type TEXT,
-      medical_notes TEXT,
-      emergency_contact TEXT,
-      last_lat DOUBLE PRECISION,
-      last_lng DOUBLE PRECISION,
-      updated_at TIMESTAMP DEFAULT now(),
-      created_at TIMESTAMP DEFAULT now()
-    );
+  CREATE TABLE IF NOT EXISTS profiles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    full_name TEXT,
+    username TEXT,
+    password_hash TEXT,
+    birth_date DATE,
+    allergies TEXT,
+    hospital TEXT,
+    contact_number TEXT,
+    emergency_email TEXT,
+    emergency_contact TEXT,
+    medical_notes TEXT,
+    blood_type TEXT,
+    last_lat DOUBLE PRECISION,
+    last_lng DOUBLE PRECISION,
+    updated_at TIMESTAMP DEFAULT now(),
+    created_at TIMESTAMP DEFAULT now()
+  );
 
-    CREATE TABLE IF NOT EXISTS nfc_tokens (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-      token TEXT UNIQUE NOT NULL,
-      uses INT DEFAULT 0,
-      max_uses INT DEFAULT 1,
-      expire_at TIMESTAMP,
-      revoked BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP DEFAULT now()
-    );
+  CREATE TABLE IF NOT EXISTS nfc_tokens (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    token TEXT UNIQUE NOT NULL,
+    uses INT DEFAULT 0,
+    max_uses INT DEFAULT 1,
+    expire_at TIMESTAMP,
+    revoked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT now()
+  );
+
   `;
 
   try {
