@@ -312,3 +312,16 @@ app.listen(PORT, () => console.log(`✅ Servidor escuchando en puerto ${PORT}`))
 // -------------------------
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`✅ Servidor escuchando en puerto ${PORT}`));
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Sirve los archivos del frontend build
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
