@@ -1,3 +1,4 @@
+import Register from './pages/Register';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -16,8 +17,6 @@ export default function App(){
         <Route path="/nfc/:token" element={<NFCView/>}/>
       </Routes>
     </BrowserRouter>
-
-    import Register from './pages/Register';
 
   )
 }
