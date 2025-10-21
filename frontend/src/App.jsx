@@ -16,5 +16,8 @@ export default function App(){
         <Route path="/nfc/:token" element={<NFCView/>}/>
       </Routes>
     </BrowserRouter>
+
+    import Register from './pages/Register';
+
   )
 }
