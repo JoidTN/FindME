@@ -8,10 +8,24 @@ export default function App(){
   return (
     <BrowserRouter>
       <header className="topbar">
-        <Link to="/"><div className="logo">FindMe</div></Link>
-        <Link to="/register">Registrar</Link>
-        <a className="findlink" href="https://www.google.com/android/find" target="_blank" rel="noreferrer">Google Find My Device</a>
+        <div className="nav-container">
+          <Link to="/" className="logo">FindMe</Link>
+          <nav className="menu">
+            <Link to="/">Iniciar sesión</Link>
+            <Link to="/register">Registrarse</Link>
+            <Link to="/dashboard">Panel</Link>
+            <a 
+              className="findlink" 
+              href="https://www.google.com/android/find" 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              Google Find My Device
+            </a>
+          </nav>
+        </div>
       </header>
+
       <Routes>
         <Route path="/" element={<Login/>}/>
         <Route path="/dashboard" element={<Dashboard/>}/>
