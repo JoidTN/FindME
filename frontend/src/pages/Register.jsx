@@ -1,37 +1,77 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const nav = useNavigate();
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const handle = async () => {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
     try {
-      const res = await fetch(import.meta.env.VITE_API_URL + '/api/auth/register', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify(form),
       });
-      const j = await res.json();
-      if (!res.ok) return alert(j.error || 'Error al registrar');
-      alert('Usuario registrado con éxito. Ahora puedes iniciar sesión.');
-      nav('/');
-    } catch (e) {
-      console.error(e);
-      alert('Error de conexión');
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage('✅ Registro exitoso. Ahora puedes iniciar sesión.');
+      } else {
+        setMessage(`⚠️ Error: ${data.error || 'No se pudo registrar'}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage('❌ Error de conexión con el servidor.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <h2>Registro</h2>
-      <input className="input" placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} />
-      <input className="input" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input className="input" placeholder="Contraseña" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      <button className="button" onClick={handle}>Registrar</button>
-      <p className="small" style={{ marginTop: 12 }}>¿Ya tienes cuenta? <a href="/">Inicia sesión</a></p>
+    <div className="login-container">
+      <h2>Crear cuenta</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="name"
+          placeholder="Nombre"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Correo"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          value={form.password}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Registrando...' : 'Registrarse'}
+        </button>
+      </form>
+      {message && <p className="message">{message}</p>}
     </div>
   );
 }
