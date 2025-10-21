@@ -1,19 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-export default function CreateProfile() {
+export default function CreateProfile({ userId }) {
   const [form, setForm] = useState({
-    full_name: '',
-    username: '',
-    password: '',
-    birth_date: '',
-    allergies: '',
-    hospital: '',
-    contact_number: '',
-    emergency_email: '',
-    emergency_contact: '',
-    medical_notes: '',
-    blood_type: '',
+    full_name: "",
+    birth_date: "",
+    contact_number: "",
+    emergency_contact: "",
+    email: "",
+    allergies: "",
+    hospital: "",
+    medical_notes: "",
   });
+  const [status, setStatus] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,39 +19,88 @@ export default function CreateProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
+    setStatus("Guardando...");
 
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/profiles`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch(
+        `https://findme-2u4v.onrender.com/api/users/${userId}/profiles`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // 👇 si ya usas token JWT en tu login
+            // Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(form),
+        }
+      );
 
-    const data = await res.json();
-    console.log('Ficha creada:', data);
-    alert('Ficha creada correctamente ✅');
+      if (!res.ok) throw new Error("Error al crear perfil");
+      const data = await res.json();
+      console.log("Perfil creado:", data);
+      setStatus("✅ Perfil creado con éxito");
+    } catch (err) {
+      console.error(err);
+      setStatus("❌ Error al crear perfil");
+    }
   };
 
   return (
-    <div className="create-profile">
-      <h2>Crear ficha médica</h2>
-      <form onSubmit={handleSubmit}>
-        {Object.keys(form).map((key) => (
-          <input
-            key={key}
-            name={key}
-            type={key === 'birth_date' ? 'date' : 'text'}
-            placeholder={key.replace('_', ' ')}
-            value={form[key]}
-            onChange={handleChange}
-          />
-        ))}
-        <button type="submit">Crear ficha</button>
+    <div className="container">
+      <h2>Crear perfil a cargo</h2>
+      <form onSubmit={handleSubmit} className="form">
+        <input
+          type="text"
+          name="full_name"
+          placeholder="Nombre completo"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="date"
+          name="birth_date"
+          placeholder="Fecha de nacimiento"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="contact_number"
+          placeholder="Número de contacto"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="emergency_contact"
+          placeholder="Contacto de emergencia"
+          onChange={handleChange}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Correo"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="allergies"
+          placeholder="Alergias"
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="hospital"
+          placeholder="Hospital preferente"
+          onChange={handleChange}
+        />
+        <textarea
+          name="medical_notes"
+          placeholder="Notas médicas o información adicional"
+          onChange={handleChange}
+        />
+        <button type="submit">Crear perfil</button>
       </form>
+
+      {status && <p>{status}</p>}
     </div>
   );
 }
