@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import NFCView from './pages/NFCView'
 import Register from './pages/Register'
+import CreateProfile from "./pages/CreateProfile";
 
 export default function App(){
   return (
@@ -31,6 +32,7 @@ export default function App(){
         <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path="/nfc/:token" element={<NFCView/>}/>
         <Route path="/register" element={<Register/>}/>
+        <Route path="/crear-perfil" element={<CreateProfile userId={1} />} />
       </Routes>
     </BrowserRouter>
   )
