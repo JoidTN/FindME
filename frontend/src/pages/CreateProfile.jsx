@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import NFCWriterButton from "../shared/NFCWriterButton";
 import { Link } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 export default function CreateProfile() {
   const [form, setForm] = useState({
@@ -14,102 +15,34 @@ export default function CreateProfile() {
     medical_notes: "",
   });
   const [status, setStatus] = useState("");
+  const [generatedUrl, setGeneratedUrl] = useState("");
   const [createdProfile, setCreatedProfile] = useState(null);
-  const [generatedUrl, setGeneratedUrl] = useState(null);
-
-  const api = import.meta.env.VITE_API_URL || "https://findme-2u4v.onrender.com";
-  const token = localStorage.getItem("fm_token");
-
-  function getUserIdFromToken(tok) {
-    try {
-      if (!tok) return null;
-      const parts = tok.split(".");
-      if (parts.length < 2) return null;
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
-      return payload.sub || payload.user_id || payload.id || payload.userId || null;
-    } catch (e) {
-      console.warn("No se pudo decodificar token JWT", e);
-      return null;
-    }
-  }
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // Save profile client-side in localStorage and generate a one-time token
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("Guardando...");
-    setCreatedProfile(null);
-    setGeneratedUrl(null);
-
-    if (!token) {
-      setStatus("No estás autenticado. Inicia sesión primero.");
-      return;
-    }
-
     try {
-      let userId = null;
-      const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+      const id = uuidv4();
+      const profile = { id, ...form, created_at: Date.now() };
+      // store profiles map
+      const profiles = JSON.parse(localStorage.getItem("findme_profiles") || "{}");
+      profiles[id] = profile;
+      localStorage.setItem("findme_profiles", JSON.stringify(profiles));
+      // generate a single-use token mapping
+      const token = uuidv4();
+      const tokens = JSON.parse(localStorage.getItem("findme_tokens") || "{}");
+      // token will map to profile id and expiry (24h)
+      tokens[token] = { profile_id: id, expires_at: Date.now() + 24 * 60 * 60 * 1000 };
+      localStorage.setItem("findme_tokens", JSON.stringify(tokens));
 
-      // 1) intenta /api/me
-      try {
-        const meRes = await fetch(`${api}/api/me`, { headers });
-        if (meRes.ok) {
-          const me = await meRes.json();
-          userId = me.id || me.userId || me._id || null;
-        }
-      } catch (err) {
-        // noop
-      }
-
-      // 2) fallback /api/users/me
-      if (!userId) {
-        try {
-          const meRes = await fetch(`${api}/api/users/me`, { headers });
-          if (meRes.ok) {
-            const me = await meRes.json();
-            userId = me.id || me.userId || me._id || null;
-          }
-        } catch (err) {}
-      }
-
-      // 3) fallback a token
-      if (!userId) {
-        userId = getUserIdFromToken(token);
-      }
-
-      if (!userId) {
-        setStatus("No se pudo determinar el ID de usuario. Revisa tu autenticación o configura /api/me.");
-        return;
-      }
-
-      const res = await fetch(`${api}/api/users/${userId}/profiles`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          full_name: form.full_name,
-          birth_date: form.birth_date,
-          contact_number: form.contact_number,
-          emergency_contact: form.emergency_contact,
-          email: form.email,
-          allergies: form.allergies,
-          hospital: form.hospital,
-          medical_notes: form.medical_notes,
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Error al crear perfil: ${res.status} ${text}`);
-      }
-
-      const data = await res.json();
-      setCreatedProfile(data);
-      // el backend puede devolver id o token; priorizamos token si existe
-      const tokenOrId = data.token || data.id || data._id || data.profileToken || null;
-      const link = window.location.origin + "/nfc/" + (tokenOrId || `profile-${Date.now()}`);
+      const link = window.location.origin + "/nfc/" + token;
       setGeneratedUrl(link);
+      setCreatedProfile(profile);
       setStatus("✅ Perfil creado con éxito. Usa el botón para escribir el link en NFC.");
     } catch (err) {
       console.error(err);
@@ -122,7 +55,7 @@ export default function CreateProfile() {
       <h2>Crear perfil a cargo</h2>
       <form onSubmit={handleSubmit} className="form">
         <input type="text" name="full_name" placeholder="Nombre completo" onChange={handleChange} required />
-        <input type="date" name="birth_date" placeholder="Fecha de nacimiento" onChange={handleChange} />
+        <input type="date" name="birth_date" onChange={handleChange} />
         <input type="text" name="contact_number" placeholder="Número de contacto" onChange={handleChange} />
         <input type="text" name="emergency_contact" placeholder="Contacto de emergencia" onChange={handleChange} />
         <input type="email" name="email" placeholder="Correo" onChange={handleChange} />
