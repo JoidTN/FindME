@@ -1,12 +1,56 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FindMe - NFC Medical</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --accent:#2b7cff;
+  --muted:#6b7280;
+  --border:#e6e9ef;
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: Inter, Roboto, system-ui, -apple-system, 'Helvetica Neue', Arial;
+  margin:0;
+  background:var(--bg);
+  color:#111827;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.container{
+  max-width:900px;
+  margin:28px auto;
+  background:transparent;
+  padding:0 16px;
+}
+
+.topbar{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 1px 0 rgba(16,24,40,0.02);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.nav-container{max-width:900px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:700;color:var(--accent);text-decoration:none}
+.menu a{margin-left:14px;color:var(--muted);text-decoration:none}
+.menu .button, .button{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
+  font-size:14px;
+}
+.form input, .form textarea{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  margin-top:10px;
+  background:var(--card);
+}
+.small{color:var(--muted);font-size:13px}
