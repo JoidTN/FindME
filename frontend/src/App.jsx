@@ -32,7 +32,7 @@ export default function App(){
         <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path="/nfc/:token" element={<NFCView/>}/>
         <Route path="/register" element={<Register/>}/>
-        <Route path="/crear-perfil" element={<CreateProfile userId={1} />} />
+        <Route path="/crear-perfil" element={<CreateProfile />} />
       </Routes>
     </BrowserRouter>
   )
