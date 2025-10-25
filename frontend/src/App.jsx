@@ -1,39 +1,31 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import React from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import NFCView from './pages/NFCView'
 import Register from './pages/Register'
-import CreateProfile from "./pages/CreateProfile";
+import Dashboard from './pages/Dashboard'
+import ManageProfiles from './pages/ManageProfiles'
+import UploadToDevice from './pages/UploadToDevice'
+
+function RequireAuth({ children }){
+  const token = localStorage.getItem('fm_token')
+  if(!token) return <Navigate to="/" replace />
+  return children
+}
 
 export default function App(){
   return (
-    <BrowserRouter>
-      <header className="topbar">
-        <div className="nav-container">
-          <Link to="/" className="logo">FindMe</Link>
-          <nav className="menu">
-            <Link to="/">Iniciar sesión</Link>
-            <Link to="/register">Registrarse</Link>
-            <Link to="/dashboard">Panel</Link>
-            <a 
-              className="findlink" 
-              href="https://www.google.com/android/find" 
-              target="_blank" 
-              rel="noreferrer"
-            >
-              Google Find My Device
-            </a>
-          </nav>
-        </div>
-      </header>
-
-      <Routes>
-        <Route path="/" element={<Login/>}/>
-        <Route path="/dashboard" element={<Dashboard/>}/>
-        <Route path="/nfc/:token" element={<NFCView/>}/>
-        <Route path="/register" element={<Register/>}/>
-        <Route path="/crear-perfil" element={<CreateProfile />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Login/>} />
+      <Route path="/register" element={<Register/>} />
+      <Route path="/app" element={
+        <RequireAuth><Dashboard/></RequireAuth>
+      } />
+      <Route path="/app/manage" element={
+        <RequireAuth><ManageProfiles/></RequireAuth>
+      } />
+      <Route path="/app/upload" element={
+        <RequireAuth><UploadToDevice/></RequireAuth>
+      } />
+    </Routes>
   )
 }
